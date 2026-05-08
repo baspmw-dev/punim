@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miss You Poonim</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .bg-gradient {
+            background: linear-gradient(135deg, #ffffff, #fce4ec, #e1f5fe);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient min-h-screen flex flex-col items-center justify-center">
+
+    <div id="main-card"
+        class="text-center p-10 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white z-10 w-full max-w-sm mx-4">
+        <h1 class="text-3xl font-bold text-gray-700 mb-6">มีอะไรจะบอก...</h1>
+        <button id="btnMain"
+            class="px-10 py-4 bg-pink-500 text-white rounded-full text-xl shadow-lg transform active:scale-95">คลิกดูสิ
+            ;w;</button>
+        <div id="resultText" class="mt-8 text-2xl font-bold text-sky-500 hidden animate-bounce">
+            ส่งความคิดถึงเรียบร้อยแล้วนะ! ❤️</div>
+    </div>
+
+    <!-- Modal 1: บังคับถาม -->
+    <div id="qModal" class="modal">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-full max-w-sm relative">
+            <h2 class="text-2xl font-semibold mb-6">ปูนิ่มคิดถึงกันไหม? 🥺</h2>
+            <div class="flex justify-center gap-4 min-h-[60px]">
+                <button id="yesBtn" class="px-6 py-2 bg-green-500 text-white rounded-lg z-20">คิดถึงที่สุด!</button>
+                <button id="noBtn"
+                    class="px-6 py-2 bg-gray-300 text-gray-600 rounded-lg z-20 transition-all duration-200">ไม่นะ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: พิมพ์คำตอบ -->
+    <div id="inputModal" class="modal">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-xl font-semibold mb-4 text-center">พิมพ์บอกอะไรหน่อย... ✍️</h2>
+            <textarea id="userResponse"
+                class="w-full border-2 border-pink-200 rounded-xl p-3 focus:border-pink-400 outline-none" rows="3"
+                placeholder="พิมพ์ตรงนี้..."></textarea>
+            <button id="submitBtn"
+                class="w-full mt-4 py-2 bg-sky-500 text-white rounded-lg font-semibold hover:bg-sky-600">ส่งคำตอบ</button>
+        </div>
+    </div>
+
+    <script>
+        const btnMain = document.getElementById('btnMain');
+        const qModal = document.getElementById('qModal');
+        const inputModal = document.getElementById('inputModal');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const userResponse = document.getElementById('userResponse');
+        const resultText = document.getElementById('resultText');
+
+        let noCount = 0;
+
+        btnMain.onclick = () => qModal.style.display = 'flex';
+
+        function moveButton(e) {
+            if (noCount < 5) {
+                const maxX = window.innerWidth - noBtn.offsetWidth - 50;
+                const maxY = window.innerHeight - noBtn.offsetHeight - 50;
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = Math.random() * maxX + 'px';
+                noBtn.style.top = Math.random() * maxY + 'px';
+                noCount++;
+                if (noCount >= 5) noBtn.style.display = 'none';
+            }
+            if (e.cancelable) e.preventDefault();
+        }
+
+        noBtn.onmouseover = moveButton;
+        noBtn.ontouchstart = moveButton;
+
+        yesBtn.onclick = () => {
+            qModal.style.display = 'none';
+            inputModal.style.display = 'flex';
+        };
+
+        submitBtn.onclick = () => {
+            const text = userResponse.value;
+            if (!text) return alert("พิมพ์บอกหน่อยนะ...");
+
+            // ส่งข้อมูลไปหลังบ้าน (PHP)
+            fetch('save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'message=' + encodeURIComponent(text)
+            })
+                .then(res => res.text())
+                .then(data => {
+                    inputModal.style.display = 'none';
+                    btnMain.style.display = 'none';
+                    resultText.classList.remove('hidden');
+                    console.log("บันทึกสำเร็จ:", data);
+                });
+        };
+    </script>
+</body>
+
+</html>
